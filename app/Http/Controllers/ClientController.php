@@ -19,8 +19,8 @@ class ClientController extends Controller
 
     public function index()
     {
-        $clients = $this->obj->paginate(5);
-        return view('system/Client/index', ['clients' => $clients]);
+        $clients = $this->obj->get();
+        return response()->json(['clients' => $clients], 200);
     }
 
     public function report($id)
