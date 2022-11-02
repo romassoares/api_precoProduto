@@ -18,12 +18,12 @@ class IngredientController extends Controller
     public function index()
     {
         $result = $this->obj->paginate(5);
-        return view('system/Ingredient/index', compact('result'));
+        return response()->json(['ingredients' => $result], 200);
     }
 
     public function create()
     {
-        return view('system/Ingredient/form');
+        return response()->json([], 200);
     }
 
     public function store(IngredientRequest $request)
@@ -31,27 +31,33 @@ class IngredientController extends Controller
         $ingredient = $request->only(['description', 'amount', 'und', 'price']);
         $result = $this->obj->cstore($ingredient);
         if ($result) {
-            return redirect()->route('ingrediente.show', $result->id);
+            return response()->json(['ingredient' => $result], 200);
         }
     }
 
     public function show($id)
     {
         $result = $this->obj->find($id);
-        return view('system/Ingredient/show', compact('result'));
+        if ($result) {
+            return response()->json(['ingredient' => $result], 200);
+        }
     }
 
     public function edit($id)
     {
         $result = $this->obj->find($id);
-        return view('system/Ingredient/form', compact('result'));
+        return response()->json(['ingredient', $result], 200);
     }
 
     public function update(IngredientRequest $request, $id)
     {
         $ingredient = $request->only(['description', 'amount', 'und', 'price']);
         $result = $this->obj->cUpdate($ingredient, $id);
-        return redirect()->route('ingrediente.show', $id);
+        if ($result) {
+            return response()->json(['ingredient', $result], 200);
+        } else {
+            return response()->json(['message' => 'não encontrado'], 404);
+        }
     }
 
     public function destroy($id)
@@ -60,17 +66,17 @@ class IngredientController extends Controller
         if ($ingredient) {
             $result = $ingredient->delete();
             if ($result) {
-                return redirect()->route('ingrediente')->with('success', 'ingrediente removido com sucesso');
+                return response()->json(['ingredient', $result], 200);
             }
         } else {
-            return redirect()->route('ingrediente')->with('warning', 'erro, ingrediente não encontrado');
+            return response()->json(['message' => 'não encontrado'], 404);
         }
     }
 
     public function archive()
     {
         $result = $this->obj->withTrashed()->where('deleted_at', '!=', null)->get();
-        return view('system/Ingredient/deleted', ['result' => $result]);
+        return response()->json(['ingredient', $result], 200);
     }
 
     public function restory($id)
@@ -79,8 +85,12 @@ class IngredientController extends Controller
         if ($result) {
             $res = $result->restore();
             if ($res) {
-                return redirect()->route('ingrediente.show', $id)->with('success', 'arquivo restaurado com sucesso');
+                return response()->json(['ingredient', $result], 200);
+            } else {
+                return response()->json(['message' => 'Erro ao tentar restaurar'], 404);
             }
+        } else {
+            return response()->json(['message' => 'não encontrado'], 404);
         }
     }
 }

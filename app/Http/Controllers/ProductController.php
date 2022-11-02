@@ -24,12 +24,12 @@ class ProductController extends Controller
     public function index()
     {
         $result = $this->obj->paginate(5);
-        return view('system/Product/index', compact('result' ?? ''));
+        return response()->json(['result' => $result], 200);
     }
 
     public function create()
     {
-        return view('system/Product/form');
+        return response()->json(['message' => 'ok'], 200);
     }
 
     public function store(ProductRequest $request)
@@ -37,9 +37,9 @@ class ProductController extends Controller
         $product = $request->only(['description', 'amount', 'und', 'price']);
         $salvo = $this->obj->cstore($product);
         if ($salvo) {
-            return redirect()->route('produto.show', $salvo->id)->with('success', 'editado com sucesso');
+            return response()->json(['product' => $salvo->id], 200);
         } else {
-            return redirect()->route('produto.create', compact('request'))->with('danger', 'erro ao tentar cadastrar o produto');
+            return response()->json(['message' => 'erro ao tentar cadastrar o produto']);
         }
     }
 
@@ -48,20 +48,26 @@ class ProductController extends Controller
         $product = $this->obj->findorfail($id);
         $ingredient = $this->ing->withTrashed()->get();
         $valGasto = $this->pr->where('product_id', $id)->get();
-        return view('system/Product/show', ['result' => $product, 'ingredient' => $ingredient, 'valGasto' => $valGasto]);
+        return response()->json(['product' => $product, 'ingredient' => $ingredient, 'valGasto' => $valGasto], 200);
     }
 
     public function edit($id)
     {
         $result = $this->obj->find($id);
-        return view('system/Product/form', compact('result' ?? ''));
+        if ($result) {
+            return response()->json(['result' => $result], 200);
+        }
+        return response()->json(['message' => 'Não encontrado'], 404);
     }
 
     public function update(Request $request, $id)
     {
         $product = $request->only(['description', 'amount', 'und', 'price']);
         $result = $this->obj->cUpdate($product, $id);
-        return redirect()->route('produto.show', $id)->with('success', 'editado com sucesso');
+        if ($result) {
+            return response()->json(['produto' => $result], 200);
+        }
+        return response()->json(['message' => 'Erro ao editar item'], 403);
     }
 
     public function destroy($id)
@@ -70,17 +76,22 @@ class ProductController extends Controller
         if ($product) {
             $result = $product->delete();
             if ($result) {
-                return redirect()->route('produto')->with('success', 'produto removido com sucesso');
+                return response()->json(['produto' => $result], 200);
             }
+            return response()->json(['message' => 'Permissão negada'], 403);
         } else {
-            return redirect()->route('produto')->with('warning', 'erro, produto não encontrado');
+            return response()->json(['message' => 'Não encontrado'], 404);
         }
     }
 
     public function archive()
     {
         $result = $this->obj->withTrashed()->where('deleted_at', '!=', null)->get();
-        return view('system/Product/deleted', compact('result'));
+        if ($result) {
+            return response()->json(['produto' => $result], 200);
+        } else {
+            return response()->json(['message' => 'Não encontrado'], 404);
+        }
     }
 
     public function restory($id)
@@ -89,8 +100,9 @@ class ProductController extends Controller
         if ($result) {
             $res = $result->restore();
             if ($res) {
-                return redirect()->route('produto.show', $id)->with('success', 'arquivo restaurado com sucesso');
+                return redirect()->route(['produto' => $res], 200);
             }
+            return response()->json(['message' => 'Não encontrado'], 404);
         }
     }
 }
