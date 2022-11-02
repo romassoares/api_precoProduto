@@ -18,13 +18,13 @@ use Illuminate\Support\Facades\Route;
 //     return response()->json(['message' => 'page login']);
 // });
 
-Route::post('/login', 'AuthController@login');
-Route::post('logout', 'AuthController@logout');
+Route::post('login', 'AuthController@login');
 Route::post('refresh', 'AuthController@refresh');
-Route::post('me', 'AuthController@me');
-
 
 Route::middleware('auth:api')->group(function () {
+    Route::post('me', 'AuthController@me');
+    Route::post('logout', 'AuthController@logout');
+
     Route::get('/home', 'HomeController@index');
 
     // produto

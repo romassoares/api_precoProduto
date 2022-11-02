@@ -24,7 +24,7 @@ class SaleController extends Controller
     {
         $sales = $this->obj->paginate(5);
         $clients = Client::withTrashed()->get();
-        return view('system.sales.index', ['sales' => $sales, 'clients' => $clients]);
+        return response()->json(['sales' => $sales, 'clients' => $clients]);
     }
 
     public function store(Request $request, Sale $sale)
@@ -36,7 +36,7 @@ class SaleController extends Controller
             $save = $sale->save();
             if ($save) {
                 $items = $this->item->get()->where('sale_id', $sale->id);
-                return view('system.sales.form', ['products' => $products,  'sale' => $sale, 'items' => $items]);
+                return response()->json(['products' => $products,  'sale' => $sale, 'items' => $items]);
             }
         } else {
             $client = Client::create(['name' => 'default']);
@@ -44,7 +44,7 @@ class SaleController extends Controller
             $result = $save->create(['client_id' => $client->id]);
             if ($result) {
                 $items = $this->item->get()->where('sale_id', $result->id);
-                return view('system.sales.form', ['products' => $products,  'sale' => $result, 'items' => $items]);
+                return response()->json(['products' => $products,  'sale' => $result, 'items' => $items]);
             }
         }
     }
@@ -75,17 +75,17 @@ class SaleController extends Controller
                 $save = $product->save();
                 if ($save) {
                     DB::commit();
-                    return redirect()->route('venda.edit', $id)->with('success', 'Adicionado');
+                    return response()->json(['sale' => $id]);
                 } else {
                     DB::rollBack();
-                    return redirect()->route('venda.edit', $id)->with('error', 'Falha ao atualizar quantidade no estoque');
+                    return response()->json(['messagge' => 'Falha ao atualizar quantidade no estoque']);
                 }
             } else {
                 DB::rollBack();
-                return redirect()->route('venda.edit', $id)->with('error', 'Falha ao atualizar quantidade na venda');
+                return response()->json(['messagge' => 'Falha ao atualizar quantidade na venda']);
             }
         } else {
-            return redirect()->route('venda.edit', $id)->with('error', 'estoque insuficiente');
+            return response()->json(['messagge' => 'estoque insuficiente']);
         }
     }
 
@@ -106,7 +106,7 @@ class SaleController extends Controller
                 $saleEdit = $sale->update(['price' => $result]);
             }
             if ($saleEdit) {
-                return redirect()->route('venda.edit', $id)->with('success', 'item removido com sucesso');
+                return response()->json('sale.edit', $id)->with('success', 'item removido com sucesso');
             }
         }
     }
@@ -131,10 +131,10 @@ class SaleController extends Controller
         if ($product) {
             $result = $product->delete();
             if ($result) {
-                return redirect()->route('venda')->with('success', 'venda removido com sucesso');
+                return response()->json('sale')->with('success', 'sale removido com sucesso');
             }
         } else {
-            return redirect()->route('venda')->with('warning', 'erro, venda não encontrado');
+            return response()->json('sale')->with('warning', 'erro, venda não encontrado');
         }
     }
 
@@ -150,7 +150,7 @@ class SaleController extends Controller
         if ($result) {
             $res = $result->restore();
             if ($res) {
-                return redirect()->route('venda.show', $id)->with('success', 'arquivo restaurado com sucesso');
+                return response()->json('sale.show', $id)->with('success', 'arquivo restaurado com sucesso');
             }
         }
     }
