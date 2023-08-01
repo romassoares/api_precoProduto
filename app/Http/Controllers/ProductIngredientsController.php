@@ -27,11 +27,12 @@ class ProductIngredientsController extends Controller
     // adciona ingrediente a receita
     public function update(Request $request, $product_id)
     {
+        dd($request);
         $product = Product::findorfail($product_id);
         $list = $request->except(['_method', '_token']);
         $result = $this->obj->get()->where('product_id', $product_id);
         foreach ($result as $exist) {
-            if ($exist->ingredient_id == intval($list['ingredient'])) {
+            if ($exist->ingredient_id == intval($list['ingredient_id'])) {
                 return response()->json(['product' => $product_id], 200);
             }
         }

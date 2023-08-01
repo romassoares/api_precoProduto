@@ -56,7 +56,7 @@ class Ingredient extends Model
         $teste = Ingredient::find($id);
         $result = $teste->update($request);
         if ($result) {
-            return  $result;
+            return  $teste;
         }
     }
 

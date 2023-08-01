@@ -35,6 +35,7 @@ class IngredientRequest extends FormRequest
         return [
             'description.required' => 'esse campo é obrigatório',
             'description.min' => 'campo deve ter no minimo 5 caracteres',
+            'description.min' => 'campo deve ter no máximo 100 caracteres',
             'amount.required' => 'esse campo é obrigatório',
             'amount.numeric' => 'campo deve ser numérico',
             'price.required' => 'esse campo é obrigatório',
